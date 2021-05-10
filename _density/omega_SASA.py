@@ -14,22 +14,6 @@ if gpus:
 tf.keras.backend.set_floatx('float64')
 
 class VisitationRatioModel_init_SASA():
-    """ w(S', A'; S) <- model
-    just change (SASA) to (SAS)
-    see the derivations on page 2, the supplement of VE
-    should be almost the same with SASA
-    
-    can we just delete? IS? 
-    the same estimation?
-        n2 = n^2        
-        X = [S, A]
-        XX = [X, X]
-        BS = batch_size        
-        S, A | S_0 = S
-        S_t is the initial state
-
-    """        
-
     def __init__(self, replay_buffer
                  , target_policy, A_range
                  , h_dims, sepe_A = 0
@@ -330,11 +314,6 @@ class VisitationRatioModel_init_SASA():
 ##############################################################################################################################
 
 class Omega_SASA_Model(tf.keras.Model):
-    ''' weights = self.model(S_r, A_r, S_t)
-    initial? a random different?
-    
-    Input for `VisitationRatioModel()`; NN parameterization
-    '''
     def __init__(self, S_dims, h_dims, A_dims = 1, gpu_number = 0):
         super(Omega_SASA_Model, self).__init__()
         self.hidden_dims = h_dims
@@ -369,12 +348,6 @@ class Omega_SASA_Model(tf.keras.Model):
         return var
 
     def call(self, inputs):
-        """
-        inputs: concatenations of S, A, S_t, A_t = [r,r,t]
-        outputs: weights?
-        where do we build the model?
-        parameter for the depth!!!
-        """
         z = tf.cast(inputs, tf.float64)
         h1 = tf.nn.leaky_relu(tf.matmul(z, self.w1) + self.b1)
         h2 = tf.nn.relu(tf.matmul(h1, self.w2) + self.b2)
@@ -397,53 +370,3 @@ class Omega_SASA_Model(tf.keras.Model):
             
             else:
                 return tf.identity(self.call(inputs)).numpy()
-
-#                 return np.vstack([self.call(inputs).cpu().numpy() for inputs in input_batches])
-#             else:
-#                 return self.call(inputs).cpu().numpy() 
-
-    
-    #     def _normalize(self, weights, BS):
-#         """
-#         check !!!
-#         """
-#         weights = tf.reshape(weights, [BS, BS])
-#         weights_sum = tf.math.reduce_sum(weights, axis=1, keepdims=True) + 1e-6
-#         weights = weights / weights_sum
-#         return tf.reshape(weights, [BS**2])
-        
-
-
-# omega_r_t_true = tf.cast(tf.cast((Xr_Xt[:, 0] > 0), np.float64) * self.A_factor_over_S == Xr_Xt[:, 2], np.float64) * 2
-
-# #################################### part 1, n3 #################################### 
-# dxx_ra_t_2_2 = self.repeat(tf.concat([S_r_a, X_t], axis = -1), BS) - self.tile(XX, BS ** 2) # (n3), rr_rt - tt_tt
-# E_K_ra_t_2_2 = self._cal_dist(X1_X2 = dxx_ra_t_2_2, median = self.medians_n3)
-
-# K_r_t_2_2 = self._cal_dist(X1 = self.repeat(Xr_Xt, BS), X2 = self.tile(XX, BS ** 2), median = self.medians_n3)
-
-# part1_bef_sum = tf.squeeze(self.repeat(omega_r_t_true, BS)) * (gamma * E_K_ra_t_2_2 - K_r_t_2_2) * self.del_dup_n3
-# part1 = 2 * (1 - gamma) * tf.reduce_mean(part1_bef_sum) 
-# #################################### part 2, n4 #################################### 
-# omega_r_t_22_2 = tf.squeeze(self.repeat(omega_r_t_true, BS ** 2)) * tf.squeeze(self.tile(tf.expand_dims(omega_r_t_true, 1), BS ** 2)) * self.del_dup_n4 # n4
-# ######
-# K_term = self._cal_dist(X1 = self.tile(tf.concat([S_r_a, X_t], axis = -1), BS ** 2)
-#                       , X2 = tf.repeat(tf.concat([S_r_a, X_t], axis = -1), BS ** 2, axis=0)
-#                       , median = self.medians_n4)
-# part2_1 = gamma ** 2 * tf.reduce_mean(K_term * omega_r_t_22_2)
-# ######
-# diff_part2_2 = self.repeat(tf.concat([S_r_a, X_t], axis = -1), BS ** 2) - self.tile(Xr_Xt, BS**2) # (n4) # rrr_rrt - ttr_ttt
-# E_K_part2_2 = self._cal_dist(X1_X2 = diff_part2_2, median = self.medians_n4) # (n4)
-
-# part2_2 = tf.reduce_mean(E_K_part2_2 * omega_r_t_22_2) * 2 * gamma 
-# ######
-# part2_3 = self._cal_dist(X1 = self.repeat(Xr_Xt, BS ** 2), X2 = self.tile(Xr_Xt, BS ** 2), median = self.medians_n4)  # n4 # rrr_rrt - ttr_ttt
-# part2_3 = tf.reduce_mean(omega_r_t_22_2 * part2_3)
-
-# part2 = (part2_1 + part2_3 - part2_2)# / BS ** 2
-# #################################### part 3 ####################################
-# dxx3 = self._cal_dist(X1 = self.repeat(XX, BS), X2 = self.tile(XX, BS), median = self.medians_n2) # n2
-# part3 = (1 - gamma) ** 2 * tf.reduce_mean(dxx3) 
-# ##################################### final loss ######################################################
-# loss_true = (part1 + part2 + part3) * 1e3
-# print(loss - loss_true)

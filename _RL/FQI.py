@@ -47,25 +47,8 @@ class MLPNetwork(tf.keras.Model):
         for dense in self.dense_layers:
             net = dense(net)
         out = self.out(net)
-        ### for Ohio, it must be negative. But not necessary for the other
-        # out = -tf.math.log(1.001 + tf.exp(out))
         return out
 
-""" hyper-parameters
-one step of fitting:
-    decay_steps -> Adam
-    lr -> Adam
-    max_epoch -> self.model.fit
-outter iter:
-    max_iter
-    eps
-"""
-
-"""
-batch RL
-deterministic policies <- Q-based
-model is the Q-network
-"""
 ################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
 class FQI(object):
     def __init__(self, num_actions=5, init_states = None, 
@@ -129,7 +112,6 @@ class FQI(object):
             states, actions, rewards, next_states = [np.array([item[i] for traj in trajs for item in traj]) for i in range(4)]
             self.nn_verbose = nn_verbose
             # FQE
-            """ ??? """
             old_targets = rewards / (1 - self.gamma)
             # https://keras.rstudio.com/reference/fit.html
             self.model.fit(states, old_targets, 
@@ -144,8 +126,6 @@ class FQI(object):
                 q_next_states = self.model.predict(next_states)            
                 targets = rewards + self.gamma * np.max(q_next_states, 1)
                 ## model targets
-                """ interesting. pay attention to below!!!
-                """
                 _targets = self.model.predict(states)
                 _targets[range(len(actions)), actions.astype(int)] = targets
                 self.model.fit(states, _targets, 
@@ -169,10 +149,6 @@ class FQI(object):
                 if path is not None and iteration % save_freq == 0 and save_freq > 0:
                     self.model.save_weights(path)
 ################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################            
-    """ self.model.predict
-    Q values? or their action probabilities???????????
-
-    """
     def Q_func(self, states, actions = None):
         with tf.device('/gpu:' + str(self.gpu_number)):
             states = tf.cast(states, tf.float64)
@@ -199,8 +175,6 @@ class FQI(object):
             return transpose(transpose(self.Q_func(states)) - self.V_func(states)) # transpose so that to subtract V from Q in batch.     
         
     def init_state_value(self, init_states = None, trajs = None, idx=0):
-        """ TODO: Check definitions. 
-        """
         if init_states is None:
             states = np.array([traj[idx][0] for traj in self.trajs])
         else:

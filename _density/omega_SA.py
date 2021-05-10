@@ -15,15 +15,8 @@ tf.keras.backend.set_floatx('float64')
 # state_ratio = state_ratio_model.predict(state; S, A)
 
 
-"""
-1. those terms including the replay_buffer needs to be provided!
-2. the corresponding estimator should be updated to the new ratio estimator!
-"""
-
 class VisitationRatioModel_init_SA():
     """ w(S, A) <- model
-    see the derivations on page 2, the supplement of VE. And derivations of Lemma 17, the minimax paper. Some errors? 
-    No open source. Need to be implemented ourself.
     """
     def __init__(self, replay_buffer
                  , target_policy, A_range
@@ -272,11 +265,6 @@ class VisitationRatioModel_init_SA():
 ######################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
 
 class Omega_SA_Model(tf.keras.Model):
-    ''' weights = self.model(S_r, A_r, S_t)
-    initial? a random different?
-    
-    Input for `VisitationRatioModel()`; NN parameterization
-    '''
     def __init__(self, S_dims, h_dims, A_dims = 1, gpu_number = 0):
         super(Omega_SA_Model, self).__init__()
         self.gpu_number = gpu_number
@@ -325,8 +313,6 @@ class Omega_SA_Model(tf.keras.Model):
     def call(self, inputs):
         """
         inputs are concatenations of S, A, S_t, A_t = [r,r,t]
-        where do we build the model?
-        parameter for the depth!!!
         """
         z = tf.cast(inputs, tf.float64)
         h1 = tf.nn.leaky_relu(tf.matmul(z, self.w1) + self.b1)
@@ -354,51 +340,3 @@ class Omega_SA_Model(tf.keras.Model):
             else:
                 return tf.identity(self.call(inputs)).numpy()
                 #return self.call(inputs).cpu().numpy() 
-
-################################################################################################################################################################
-    #     def _normalize(self, weights, BS):
-#         """
-#         check !!!
-#         """
-#         weights = tf.reshape(weights, [BS, BS])
-#         weights_sum = tf.math.reduce_sum(weights, axis=1, keepdims=True) + 1e-6
-#         weights = weights / weights_sum
-#         return tf.reshape(weights, [BS**2])
-        
-
-#             print(part1.numpy() * 1e3, part2.numpy() * 1e3, part3.numpy() * 1e3, K_1, K_2) # , part2_1.numpy() * 1e3, part2_2.numpy() * 1e3, part2_3.numpy() * 1e3
-            
-            # print("LOSS - TRUE = {}".format(loss * 10000 - loss_true * 10000))
-
-#             """ !!!!!!!!!! """
-#             omega = tf.cast(tf.cast((S[:, 0] > 0), np.float64) * A_factor_over_S == A, np.float64) * 2
-#             omega_t = tf.squeeze(tf.tile(omega[:, np.newaxis], [BS, 1]))
-#             #################################### part 1 #################################### 
-#             K_1 = tf.reduce_mean(self._cal_dist(X1 = SS_r_a, X2 = S_t_a, median = self.median) * self.repeat(omega, BS))
-#             K_1 *= (2 * self.gamma * (1 - self.gamma)) #* self.gamma
-
-#             K_2 = self._cal_dist(X1 = X_r, X2 = S_t_a, median = self.median) * self.repeat(omega, BS) #* omega_t
-#             K_2 = tf.reduce_mean(K_2) 
-#             K_2 *= (2 * (1 - self.gamma))
-
-#             part1 = K_1 - K_2
-#             #################################### part 2 #################################### 
-#             omega_r_t = self.repeat(omega, BS) * tf.squeeze(self.tile(omega[:, tf.newaxis], BS)) # n2
-#             ########
-#             part2_1 = tf.reduce_mean(self._cal_dist(X1 = SS_r_a, X2 = SS_t_a, median = self.median) * omega_r_t)
-#             part2_1 *= self.gamma ** 2
-#             ########
-#             part2_3 = self._cal_dist(X1 = X_r, X2 = X_t, median = self.median)  # n4 # rrr_rrt - ttr_ttt
-#             part2_3 = tf.reduce_mean(omega_r_t * part2_3)
-#             ########
-#             part2_2 = tf.reduce_mean(self._cal_dist(X1 = SS_r_a, X2 = X_t, median = self.median) * omega_r_t)
-#             part2_2 *= (2 * self.gamma)
-
-#             part2 = part2_1 - part2_2 + part2_3
-#             #################################### part 3 ####################################
-#             part3 = tf.reduce_mean(self._cal_dist(X1 = S_r_a, X2 = S_t_a, median = self.median))
-#             part3 *= (1 - self.gamma) ** 2
-#             ##################################### final loss ######################################################
-#             loss_true = part1 + part2 + part3
-# #             print(part1.numpy() * 1e3, part2.numpy() * 1e3, part3.numpy() * 1e3, K_1, K_2) # , part2_1.numpy() * 1e3, part2_2.numpy() * 1e3, part2_3.numpy() * 1e3
-#             print((loss - loss_true) * 1e4, loss_true * 1e4, part1, part2, part3)

@@ -194,7 +194,6 @@ class ARE():
     
     
     def est_triply_robust(self):
-        # can be combined with the last?
         self.cond_X_on_S, self.cond_X_on_SS, self.cond_X_on_init_S = {}, {}, {}
         self.cond_X_on_S_idx, self.cond_X_on_SS_idx, self.cond_X_on_init_S_idx = {}, {}, {}
         self.Q2_S_debiased, self.Q2_SS_debiased, self.Q2_S_init_S_debiased = {}, {}, {}
@@ -236,7 +235,6 @@ class ARE():
             self.cond_X_on_init_S[k], self.cond_X_on_init_S_idx[k] = get_cond_w(init_S_A)
 
             # printG("<------------- TR density estimation for fold {} DONE! Time cost = {:.1f} minutes ------------->".format(k, (now() - curr_time) / 60))
-            # all time cost here
             def get_debiased_Q(Q_before_debias, omega_star, idx = None):
                 """ 
                 input: Q functions and conditional density
@@ -256,8 +254,6 @@ class ARE():
                 # debiased
                 Q2_S_debiased = Q_before_debias + Q2_S_debias
                 return Q2_S_debiased, Q_before_debias[:, np.newaxis] + Q2_S_debias_bef
-            # no A -> no difference between SS and S? very close
-            # all three Q-related NEED TO be biased
 
             self.Q2_S_debiased[k], self.large["Q2_S_debiased_bef"][k] = get_debiased_Q(Q_before_debias = self.DR[k]["Q_S"], omega_star = self.cond_X_on_S[k], idx = self.cond_X_on_S_idx[k]) # (NT, )
             self.Q2_SS_debiased[k], self.large["Q2_SS_debiased_bef"][k] = get_debiased_Q(Q_before_debias = self.DR[k]["Q_SS"], omega_star = self.cond_X_on_SS[k], idx = self.cond_X_on_SS_idx[k]) # (NT, )
@@ -285,7 +281,6 @@ class ARE():
     ####################################################################################################
     
     def est_quad_robust(self):
-        #### we can do similar record for triply and re-do these
         # quadruple; infinite
         self.Q3_S_debiased, self.Q3_SS_debiased, self.Q3_S_init_S_debiased = {}, {}, {}
         self.psi3_it = []
