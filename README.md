@@ -1,4 +1,4 @@
-# Deeply-Debiased Off-policy Interval Estimation
+# Deeply-Debiased Off-policy Interval Estimation (D2OPE)
 
 This repository is the official implementation of the paper "Deeply-Debiased Off-policy Interval Estimation" (ICML 2021) in Python.
 
