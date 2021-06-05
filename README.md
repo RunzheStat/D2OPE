@@ -10,7 +10,7 @@ Off-policy evaluation learns a target policy's value with a historical dataset g
 
 | Method | Results |
 | :-------:    |         :-------: |
-| <img align="center" src="diagram.png" alt="drawing" width="300">   | <img align="center" src="ohio_all.png" alt="drawing" width="500" >  
+| <img align="center" src="diagram.png" alt="drawing" width="300">   | <img align="center" src="ohio_all.png" alt="drawing" width="600" >  
 
 
 ## File overview
